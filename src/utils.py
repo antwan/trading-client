@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
-import os
 from time import sleep
+import os
+import signal
 import threading
 
 
@@ -23,6 +24,11 @@ def countdown(end, formatter='{}...', prompt='?', end_prompt='terminated'):
     CURSOR_DOWN = '\x1b[1B'
     ERASE_LINE = '\x1b[2K'
 
+    def timer_expired(*args):
+        raise TimeoutError()
+
+    signal.signal(signal.SIGUSR1, timer_expired)
+
     def timer(end):
         stopped = False
         while utcnow() < end - timedelta(seconds=1) and not stopped:
@@ -32,15 +38,16 @@ def countdown(end, formatter='{}...', prompt='?', end_prompt='terminated'):
             t = threading.currentThread()
             stopped = getattr(t, 'stopped', False)
         if not stopped:
-            print(end_prompt)
-            # pylint: disable=protected-access
-            os._exit(1)
+            os.kill(os.getpid(), signal.SIGUSR1)
 
     print(formatter)
     print(prompt)
-    t = threading.Thread(target=timer,args=(end,))
-    t.start()
-    val = input()
-    t.stopped = True
-    t.join()
-    return val
+    try:
+        t = threading.Thread(target=timer,args=(end,))
+        t.start()
+        val = input()
+        t.stopped = True
+        t.join()
+        return val
+    except TimeoutError:
+        print(end_prompt)

@@ -235,7 +235,7 @@ def trade(instrument, side, quantity):
         'Proceed? y/[N]',
         'The quote has expired'
     )
-    if confirm.lower() not in ['y', 'yes']:
+    if not confirm or confirm.lower() not in ['y', 'yes']:
         print('Trade aborted')
         return
 
