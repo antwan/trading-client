@@ -39,9 +39,13 @@ class B2C2Api():
         self.last_quote_request = None
 
     def _generate_client_id(self):
+        """ Returns an API client ID """
+
         return str(uuid.uuid4())
 
     def _check_response(self, response):
+        """ Checks whether an API response is valid """
+
         if response.status_code not in [200, 400]:
             response.raise_for_status()
 
@@ -68,7 +72,7 @@ class B2C2Api():
         except requests.HTTPError as err:
             raise ApiError(f'API HTTP Error: {err}') from None
 
-        except IndexError:
+        except (KeyError, IndexError):
             raise ApiError('Invalid data') from None
 
     def get_balances(self):
@@ -86,9 +90,8 @@ class B2C2Api():
         except requests.HTTPError as err:
             raise ApiError(f'API HTTP Error: {err}') from None
 
-        except (IndexError, ValueError, InvalidOperation) as err:
+        except (KeyError, IndexError, ValueError, InvalidOperation) as err:
             raise ApiError(f'Invalid data: {err}') from None
-
 
     def request_quote(self, instrument, side, quantity):
         """ Request a quote for the given instrument, side and quantity """
@@ -115,7 +118,7 @@ class B2C2Api():
             # Getting an estimation of the latency with local clock
             delay = isoparse(data['created']) - now
 
-            self.last_quote_request = [instrument, side, quantity]
+            self.last_quote_request = (instrument, side, quantity)
             self.last_quote_valid_until = isoparse(data['valid_until']) - delay
             self.last_quote_price = Decimal(data['price'])
 
@@ -125,9 +128,8 @@ class B2C2Api():
         except requests.HTTPError as err:
             raise ApiError(f'API HTTP Error: {err}') from None
 
-        except (IndexError, ValueError, InvalidOperation) as err:
+        except (KeyError, IndexError, ValueError, InvalidOperation) as err:
             raise ApiError(f'Invalid data: {err}') from None
-
 
     def place_order(self, instrument, side, quantity):
         """ Place a trading order using the last quote """
@@ -137,7 +139,7 @@ class B2C2Api():
             side, quantity, instrument, self.last_quote_price
         )
 
-        assert self.last_quote_request == [instrument, side, quantity], 'Should get a quote first'
+        assert self.last_quote_request == (instrument, side, quantity), 'Should get a quote first'
         assert self.last_quote_price is not None, 'Should get a quote first'
         assert utcnow() < self.last_quote_valid_until, 'Last quote should not have expired'
 
@@ -168,7 +170,7 @@ class B2C2Api():
         except requests.HTTPError as err:
             raise ApiError(f'API HTTP Error: {err}') from None
 
-        except (IndexError, ValueError, InvalidOperation) as err:
+        except (KeyError, IndexError, ValueError, InvalidOperation) as err:
             raise ApiError(f'Invalid data: {err}') from None
 
 def print_instruments():

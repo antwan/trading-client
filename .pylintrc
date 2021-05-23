@@ -1,5 +1,5 @@
 [MESSAGES CONTROL]
-disable=missing-module-docstring, relative-beyond-top-level
+disable=missing-docstring, relative-beyond-top-level
 ignore-mixin-members=yes
 
 [BASIC]
@@ -20,3 +20,4 @@ max-public-methods=100
 max-parents=20
 max-locals=25
 max-branches=20
+max-line-length=120
