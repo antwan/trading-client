@@ -1,6 +1,6 @@
-# 💸 Tranfer client command line tool
+# 💸 Trading client command line tool
 
-This is a simple demo crypto transfer CLI tool written in Python. It connects to an API to get quote and make transfer after confirmation
+This is a simple demo crypto trading CLI tool written in Python. It connects to an API to get quote and make trading order after confirmation
 
 ## Installation and running
 
